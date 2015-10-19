@@ -5,4 +5,10 @@
  *      Author: zarifaziz
  */
 
-// comment
+// This is my main file
+
+int main(int argc, char *argv[])
+{
+	// New comment
+	return 0;
+}
