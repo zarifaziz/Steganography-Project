@@ -5,12 +5,12 @@
  *      Author: zarifaziz
  */
 
+#include "bitmap.h"
+#include "steg.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "bitmap.h"
-#include "steg.h"
 
 // build command
 // gcc -Werror --std=c99 *.c -lm
@@ -28,9 +28,12 @@ int main(int argc, char *argv[])
 		case 3:
 			//decode(argv[1], argv[2]);
 			break;
-
 		case 4:
+<<<<<<< HEAD
 			//encode(argv[1], argv[2], argv[3]);
+=======
+			// encode(argv[1], argv[2], argv[3]);
+>>>>>>> newbranch
 			break;
     // If program is run with wrong arguments, print following message and terminate
 		default:
@@ -38,7 +41,11 @@ int main(int argc, char *argv[])
 				"\tsteg <bmpfile> <datafile> <outputfile>\n"
 				"\tsteg <bmpfile> <outputfile>\n");
 			break;
+<<<<<<< HEAD
 	   }
+=======
+	}
+>>>>>>> newbranch
 //  #endif
 
   printf("Running thru da 6 with my code\n");
