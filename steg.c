@@ -15,6 +15,9 @@
 // build command
 // gcc -Werror --std=c99 *.c -lm
 
+// run command
+// ./a.out
+
 
 // This is my main file
 int main(int argc, char *argv[])
@@ -34,18 +37,16 @@ int main(int argc, char *argv[])
 			userInterface();
 			break;
 		}
+    // If program is run with wrong arguments, print following message and terminate
 		default:
 			printf("Usage: (encode or decode, respectively)\n"
 				"\tsteg <bmpfile> <datafile> <outputfile>\n"
-				"\tsteg <bmpfile> <outputfile>\n\n"
-				"OR type \"open\" for user interface");
+				"\tsteg <bmpfile> <outputfile>\n");
 			break;
 	}
   #endif
 
-  printf("Hello World\n");
-
-  test();
+  printf("Running\n");
 
 	return 0;
 }

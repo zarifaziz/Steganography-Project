@@ -1,9 +1,9 @@
 #include "bitmap.h"
 #include <stdlib.h>
 
-/* 
+/*
  * Private interface
- */ 
+ */
 
 typedef struct                       /**** BMP file header structure ****/
 {
@@ -37,11 +37,11 @@ static void error(const char *message)
 
 static void check(size_t isone)
 {
-    if (!isone) 
+    if (!isone)
         error("Could not read header from bitmap file.");
 }
 
-/* Compute the number of remaining bytes in a file from the current position 
+/* Compute the number of remaining bytes in a file from the current position
     of the file-index to the end-of-file. Original file-index position is preserved. */
 static long flength(FILE *fp)
 {
@@ -77,11 +77,11 @@ static Info get_info(FILE *fp)
     return info;
 }
 
-/* 
+/*
  * Implementations for public interface
- */ 
+ */
 
-/* Checks the header information of a bitmap file. Terminates the program if 
+/* Checks the header information of a bitmap file. Terminates the program if
  *  the file is not a bitmap, or has invalid format.
  *  Returns the size (in bytes) of (i) the header, (ii) the pixel data. */
 BmpData check_bitmap(FILE *fp)
