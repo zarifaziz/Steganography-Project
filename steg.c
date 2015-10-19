@@ -10,13 +10,11 @@
 #include <string.h>
 #include <ctype.h>
 #include "bitmap.h"
-//#include "steg.h"
+#include "steg.h"
 
 // build command
 // gcc -Werror --std=c99 *.c -lm
 
-//Declaring function
-int test(void);
 
 // This is my main file
 int main(int argc, char *argv[])
