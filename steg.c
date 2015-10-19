@@ -26,14 +26,10 @@ int main(int argc, char *argv[])
   switch (argc)
 	{
 		case 3:
-			//decode(argv[1], argv[2]);
+			decode(argv[1], argv[2]);
 			break;
 		case 4:
-<<<<<<< HEAD
 			//encode(argv[1], argv[2], argv[3]);
-=======
-			// encode(argv[1], argv[2], argv[3]);
->>>>>>> newbranch
 			break;
     // If program is run with wrong arguments, print following message and terminate
 		default:
@@ -41,11 +37,7 @@ int main(int argc, char *argv[])
 				"\tsteg <bmpfile> <datafile> <outputfile>\n"
 				"\tsteg <bmpfile> <outputfile>\n");
 			break;
-<<<<<<< HEAD
-	   }
-=======
 	}
->>>>>>> newbranch
 //  #endif
 
   printf("Running thru da 6 with my code\n");
