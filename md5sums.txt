@@ -1,0 +1,5 @@
+3d0714706b19ae50cf5d6efad9b95490  acfr-steg.bmp
+5f0583fea68b180aaf0f66cbf6e4a33d  bitmap.c
+315aea7fc0ad28ce6e0123f4628d589c  bitmap.h
+617d23a0612bd2f50f6b7981a70c5168  frog.bmp
+c6cb28a660baedde2e43843fbf57b1de  test.c
