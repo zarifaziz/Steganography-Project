@@ -5,7 +5,7 @@
 #include <assert.h>
 #include "bitmap.h"
 
-int main(void)
+int test(void)
 {
     FILE *fbmp = fopen("frog.bmp", "rb");
     FILE *fout = fopen("frogi.bmp", "wb");
@@ -26,7 +26,7 @@ int main(void)
     while (bdat.numpixelbytes--) { /* Transform pixel data */
         int c = fgetc(fbmp);
         assert(c != EOF);
-        fputc(~c, fout); 
+        fputc(~c, fout);
     }
 
     assert(fgetc(fbmp) == EOF);
