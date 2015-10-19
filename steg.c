@@ -22,31 +22,26 @@
 // This is my main file
 int main(int argc, char *argv[])
 {
-  #if 0
+//  #if 0
   switch (argc)
 	{
 		case 3:
-			decode(argv[1], argv[2]);
+			//decode(argv[1], argv[2]);
 			break;
 
 		case 4:
-			encode(argv[1], argv[2], argv[3]);
+			//encode(argv[1], argv[2], argv[3]);
 			break;
-		case 1:
-		{
-			userInterface();
-			break;
-		}
     // If program is run with wrong arguments, print following message and terminate
 		default:
 			printf("Usage: (encode or decode, respectively)\n"
 				"\tsteg <bmpfile> <datafile> <outputfile>\n"
 				"\tsteg <bmpfile> <outputfile>\n");
 			break;
-	}
-  #endif
+	   }
+//  #endif
 
-  printf("Running\n");
+  printf("Running thru da 6 with my code\n");
 
 	return 0;
 }
