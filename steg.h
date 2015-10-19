@@ -8,7 +8,22 @@
 #ifndef STEG_H_
 #define STEG_H_
 
-//Declaring functions
+/* Declaring rules: Constants, arrays, integers, functions
+ */
+#define SIZE 255
 
+const char *bmpfile;
+const char *outputfile;
+
+//Declaring functions
+int decode(const char *bmpfile, const char *outputfile);
+
+// Checking whether output file already exists
+// if yes, will return 1. Otherwise will return 0
+int checkfile(const char *filename);
+
+// Asks whether user wants to output file
+// if yes, will return 1. Otherwise will return 0
+int overwritePrompt(const char *outputfile);
 
 #endif /* STEG_H_ */
