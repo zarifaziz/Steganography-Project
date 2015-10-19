@@ -76,5 +76,8 @@ int decode(const char *bmpfile, const char *outputfile)
   { /* skip over the header */
       int c = fgetc(fbmp);
   }
+
+  // I BETTER SEE YOU
+  
   return 0;
 }
