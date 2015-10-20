@@ -10,7 +10,7 @@
 
 /* Declaring rules: Constants, arrays, integers, functions
  */
-#define SIZE 255
+#define SMALLSIZE 5
 
 const char *bmpfile;
 const char *outputfile;
@@ -24,6 +24,6 @@ int checkfile(const char *filename);
 
 // Asks whether user wants to output file
 // if yes, will return 1. Otherwise will return 0
-int overwritePrompt(const char *outputfile);
+int overwritePromptYes(const char *outputfile);
 
 #endif /* STEG_H_ */

@@ -13,28 +13,37 @@
 #include <assert.h>
 #include <ctype.h>
 
-int bin_dec(char *size_bin);
-
+// REMOVE THIS FUNCTION
+// int bin_dec(char *size_bin);
+/
+// checking if outputfile already exists
 int checkfile(const char * outputfile)
 {
   FILE *fp;
   if (fp == fopen(outputfile, "rb"))
   {
+    // DOES THE OPPOSITE, ASK TUTOR
     fclose(fp);
-    return 1;
+    return 0;
   }
-  return 0;
+  printf("detecting duplicate file\n");
+  return 1;
 }
 
-int overwritePrompt(const char * outputfile)
+int overwritePromptYes(const char * outputfile)
 {
-  char str[SIZE];
+
+  printf("Running at the start of overwrite function\n");
+
+
+  char str[SMALLSIZE];
   printf("Output file %s already exists. Overwrite (y/n)?\n", outputfile);
 	fgets(str, 3, stdin);
 
   //Checking that 'y' was entered followed by enter key
   //Otherwise, exit the program
-	if (str[0] != 'y' || str[1] != '\n')
+  // changed from || to &&
+	if (str[0] == 'y' && str[1] == '\n')
 	{
 		return 1;
 	}
@@ -48,10 +57,13 @@ int decode(const char *bmpfile, const char *outputfile)
 	{
     // query whether to overwrite, terminating the program
     // if the user doesn’t type ‘y’
-		if (overwritePrompt(outputfile))
+		if (!overwritePromptYes(outputfile))
 		{
-      // breaks out of the function ??
-			return 1;
+      // breaks out of the function if
+      // overwrite prompt is no
+      // changing from return 1 to an exit
+      printf("About to exit!\n");
+			exit(0);
 		}
     // else
     // {
@@ -75,6 +87,7 @@ int decode(const char *bmpfile, const char *outputfile)
 
   while (bdat.headersize--)
   { /* skip over the header */
+      //int c = 0 ??
       int c = fgetc(fbmp);
   }
 
@@ -85,7 +98,9 @@ int decode(const char *bmpfile, const char *outputfile)
       for (int i = 0; i <= 31; i++) {
           int c = fgetc(fbmp);
           assert(c != EOF);
+
           // need new system for multiple bits
+          // what's c divided by 0 ?
           if(c % 2 != 0) {
             size_dec += 1; // the current LSB is 1 to bring that across
           }
@@ -126,7 +141,6 @@ int decode(const char *bmpfile, const char *outputfile)
         current_byte = current_byte << 1;
         }
       }
-  printf("I BETTER SEE YOU\n");
-  //I BETTER SEE YOU
+  printf("Running after end of decode\n");
   return 0;
 }
