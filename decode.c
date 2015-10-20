@@ -15,7 +15,7 @@
 
 // REMOVE THIS FUNCTION
 // int bin_dec(char *size_bin);
-/
+
 // checking if outputfile already exists
 int checkfile(const char * outputfile)
 {

@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 	}
 //  #endif
 
-  printf("Running thru da 6 with my code\n");
+  printf("Running after switch statement\n");
 
 	return 0;
 }
