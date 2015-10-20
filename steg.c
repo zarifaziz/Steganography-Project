@@ -13,10 +13,10 @@
 #include <ctype.h>
 
 // build command
-// gcc -Werror --std=c99 *.c -lm
+// gcc -Werror --std=c99 *.c -lm -o steg
 
 // run command
-// ./a.out
+// ./steg acfr...
 
 
 // This is my main file
