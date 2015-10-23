@@ -1,0 +1,91 @@
+/*
+* decode.c
+* created on 17 oct 2015
+*
+* Takes two inputs: the file to be read and
+* the output file name to be written with the message.
+* The function skips the header of the image, pulls the size value of
+* the message from the LSB of the first 32 bytes of pixel data, and then
+* extracts the relevant information from the rest of the file to pull out
+* the message.
+* The message is written to a file named with the output file input in
+* the program directory.
+*/
+
+#include "steg.h"
+#include "bitmap.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+#include <math.h>
+
+int decode(char *read, char *write)
+{
+  filecheck(write); // Check if the output file exists
+  FILE *fbmp = fopen(read, "rb");
+  FILE *fout = fopen(write, "wb");
+  opencheck(fbmp,read); // confirm we could open files
+  opencheck(fout,write);
+
+  BmpData bdat = check_bitmap(fbmp); // get header and pixel information
+
+  fseek(fbmp, bdat.headersize, SEEK_SET);    // skip header
+
+  int sizebuff = 32; // number of bytes to store size
+  int size_dec = 0; // need to be a long for 32 bits?
+
+  for (int i = 0; i < sizebuff; i++) { // pull first 32 bytes for size
+    int c = fgetc(fbmp);
+    assert(c != EOF);
+    if(c%2 != 0) {
+      size_dec += 1; // the current LSB is 1 to bring that across
+    }
+    if (i+1 != sizebuff) {
+      size_dec <<= 1; // dont do bitwise on the last one
+    }
+  }
+
+  int bitspbyte = 8;
+  int num_bits = size_dec *bitspbyte;
+
+
+  // Checking how many times we need to loop
+  int p = floor((num_bits-1) / (bdat.numpixelbytes - sizebuff)) + 1;
+  if (p > bitspbyte) { // need more than 8 bits per byte
+    printf("Error: Expected data size is larger than available space in bitmap.\n");
+    exit(0);
+  }
+
+  int current_byte = 0; // Current message byte we are pulling out
+  int n = 1; // position number of the byte we need to pull
+
+  // Now for the rest of the data until the number given above
+  // we need to go through and pull out the LSB
+  for (int i = 1; i<= num_bits /* && p >= 1 */ ; i++) {
+    int c = fgetc(fbmp);
+    assert(c != EOF); // check we didnt hit the end
+
+    c >>= n-1; // perform bitwise >> to degree n-1 (first will be 0)
+
+    if(c%2!=0) {
+      current_byte += 1; // the current LSB is 1 so bring that across
+    }
+
+    if (i%bitspbyte==0) {
+      fputc(current_byte, fout); // every 8 bits we need to push to file
+      current_byte = 0; // and reset the byte
+    }
+    else { // But otherwise we just perform the bit ops and keep going
+      current_byte <<= 1;
+    }
+
+    if ((i/n) + sizebuff == bdat.numpixelbytes && p > 1) {
+      // "if next c is going to be the end of bmp and we have more to go"
+      fseek(fbmp, bdat.headersize+sizebuff, SEEK_SET);    // seek to writable bytes
+      n++; // going to be looking at the next order bit
+      p--; // need to keep track of many more time we need to do this
+    }
+  }
+  return 0;
+}

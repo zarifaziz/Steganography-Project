@@ -34,8 +34,7 @@ int overwritePromptYes(const char * outputfile)
 {
 
   printf("Running at the start of overwrite function\n");
-
-
+  // initialing array
   char str[SMALLSIZE];
   printf("Output file %s already exists. Overwrite (y/n)?\n", outputfile);
 	fgets(str, 3, stdin);
@@ -85,62 +84,101 @@ int decode(const char *bmpfile, const char *outputfile)
   // get the header and pixel data information
   bdat = check_bitmap(fbmp);
 
+  // Skipping over the header block
   while (bdat.headersize--)
-  { /* skip over the header */
-      //int c = 0 ??
+  {
+      // increasing the counter for the fgetc
       int c = fgetc(fbmp);
   }
 
-  int size_dec = 0;
+  // tells you the size of your message in bytes
+  int bytSize = 0;
 
       // Trying to pull out the first 32 bytes for the size of data
       // display 1 or 0 based on the modulus of the byte/2
-      for (int i = 0; i <= 31; i++) {
+      // c is in decimal system, it's an int
+      for (int bytPos = 0; bytPos <= 31; bytPos++) {
+
+          // getting next bytes
           int c = fgetc(fbmp);
+          // throw an error if EOF is reached
           assert(c != EOF);
 
           // need new system for multiple bits
           // what's c divided by 0 ?
+          // if modulus is not = 0, the LSB is 1
           if(c % 2 != 0) {
-            size_dec += 1; // the current LSB is 1 to bring that across
+            // the current LSB is 1, so store that
+            bytSize = bytSize + 1;
           }
-          if (i != 31) {
-            size_dec = size_dec << 1; // dont do bitwise on the last one
+          // Store LSB to second LSB
+          // do not perform left shift on the last bit
+          if (bytPos != 31) {
+            // introduce new zero to the LSB
+            // shifts the 1 or 0 to the left
+            bytSize = bytSize << 1;
           }
       }
 
-  int num_bits = size_dec *8;
+    // converting from bytes to bits
+  int bitSize = bytSize * 8;
 
   /*
   * Need to do a calculation to figure out how many times
   * we are going to need to loop through if at all
   */
+  
+
+// FOR LOOPING
+  // going to take the number of the bytes of the image minus 32
+  // number of bits divided by that value
+  // what we get is the number of bits per byte that we have to manipulate
+  // if that number is greater than 8, then we get an error
+
 
   // Here is where we loop through the image and pull out all the bits
-  int current_byte = 0; // Current message byte we are pulling out
+
+  // Current message byte we are pulling out
+  int current_byte = 0;
 
       // Now for the rest of the data until the number given above
       // we need to go through and pull out the LSB
-      for (int i = 1; i<= num_bits; i++) {
+      for (int j = 1; j <= bitSize; j++) {
+
+        // getting next bytes
         int c = fgetc(fbmp);
-        assert(c != EOF); // change this to print a message?
+        // throw an error if EOF is reached
+        assert(c != EOF);
 
         // This is where I would implement stuff to move around
         // if we need to go through data more than once
 
         // need new system for multiple bits
         if(c % 2 != 0) {
-          current_byte += 1; // the current LSB is 1 to bring that across
+          // the current LSB is 1, so store that
+          current_byte = current_byte + 1;
         }
 
-        if (i % 8 == 0) {
+        // every time we go through 8 bytes of the image to get 8 bits
+        // which means we have one byte of the message, we push that
+        // byte out to the file
+        // reset the current to 0 and go through the next 8
+        if (j % 8 == 0) {
           fputc(current_byte, fout); // every 8 bits we need to push to file
           current_byte = 0; // and reset the byte
         }
-        else { // But otherwise we just perform the bit ops and keep going
+        // But otherwise we just perform the bit ops and keep going
+        else
+        {
         current_byte = current_byte << 1;
         }
       }
+
   printf("Running after end of decode\n");
   return 0;
 }
+
+// TIPS FOR ENCODING
+// first figure out the binary
+
+//
