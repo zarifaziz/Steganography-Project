@@ -58,6 +58,7 @@ int decode(char *read, char *write)
   }
 
   int current_byte = 0; // Current message byte we are pulling out
+
   int n = 1; // position number of the byte we need to pull
 
   // Now for the rest of the data until the number given above
