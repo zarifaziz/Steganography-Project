@@ -1,0 +1,143 @@
+/*
+* encode.c
+* Created by aaron clements 17th october 15
+* functin takes three inputs
+* 1. the file to be read
+* 2. data file to be embedded
+* 3. the output destination name
+*
+* embeds 2. into 1. to create 3. without modifying the input 1.
+*/
+
+#include "bitmap.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <string.h>
+
+static long flength(FILE *fp);
+
+int encode(char *read,char * data,char *write)
+{
+  // Check here if the output file already exists
+  filecheck(write);
+
+  // Copy in from test - still need to replace the fixed inputs with args
+  FILE *fbmp = fopen(read, "rb");
+  FILE *fdata = fopen(data, "rb");
+  FILE *fout = fopen(write, "wb");
+
+  // Check that the pointers above actually point to something
+  if (fbmp == NULL || fout == NULL || fdata == NULL) {
+      printf("Error: Could not open files.\n");
+      return 1;
+  }
+
+  // get the header and pixel data information
+  BmpData bdat = check_bitmap(fbmp);
+
+  while (bdat.headersize--) { /* Copy header verbatim */
+      int c = fgetc(fbmp);
+      fputc(c, fout);
+  }
+
+  // Analyse the datafile and get its size information and message in binary
+  int len = flength(fdata); // decimal value of message length in bytes
+  char blen[33];
+  memset(blen, '\0',33); //make sure we arent concantenating accidentally
+  dec_bin(len, &blen[0], 32);
+  // printf("message length = %s\n", blen);
+  rewind(fdata);
+
+// Can simplify this whole process by doing bitwise and breaking down the
+// Decimal value of the size to manipulate each byte of the first 32
+
+  // Copy the first 32 bytes with the size of message information embedded
+  for (int i = 0; i < 32; i++) { // Should go 0-31 which is 32 bytes total
+    int c = fgetc(fbmp);
+    assert(c != EOF);
+    // Figure out if the given byte ends in 0 or 1
+    if (c%2 == 0) {
+      // Here means it currently ends in 0
+      if (blen[i] == '0') {
+        // and thats what we want, so copy across verbatim
+        fputc(c, fout);
+      }
+      else {
+        //Otherwise the normal is 0 and we want 1 so
+        fputc(c+1, fout);
+      }
+    }
+    else {
+      // Here the given byte ends in 1
+      if (blen[i] == '1') {
+        // if we also want it to be 1 copy verbatim
+        fputc(c, fout);
+      }
+      else {
+        // Otherise bring it back down to 0
+        fputc(c-1, fout);
+      }
+    }
+    bdat.numpixelbytes--; // Need to count these so we dont overwrite with message
+  }
+
+/* Get the binary values of the message content */
+  // Loop through the message file casting the chars as ints and feeding
+  // them through a decimal to binary converter
+  for (int i = 0; i < len; i++) {
+    char bin_digit[9];
+    memset(bin_digit, '\0', 9); // Think it might be concantenating due to no NULL
+    int d = fgetc(fdata);
+    dec_bin(d, &bin_digit[0], 8);
+
+    /* This is a disgustingly long chunk of code that needs to be
+    * put in a function for both instances
+    */
+    // Here we are taking the binary of each message char and
+    // going through the same process as above to write the message in
+    for (int i = 0; i < 8; i++) { // Should go 0-7 which is 8 bytes total
+      int c = fgetc(fbmp);
+      assert(c != EOF);
+      // Figure out if the given byte ends in 0 or 1
+      if (c%2 == 0) {
+        // Here means it currently ends in 0
+        if (bin_digit[i] == '0') {
+          // and thats what we want, so copy across verbatim
+          fputc(c, fout);
+        }
+        else {
+          //Otherwise the normal is 0 and we want 1 so
+          fputc(c+1, fout);
+        }
+      }
+      else {
+        // Here the given byte ends in 1
+        if (bin_digit[i] == '1') {
+          // if we also want it to be 1 copy verbatim
+          fputc(c, fout);
+        }
+        else {
+          // Otherise bring it back down to 0
+          fputc(c-1, fout);
+        }
+      }
+      bdat.numpixelbytes--; // Need to count these so we dont overwrite with message
+    }
+
+  }
+  // printf("\n"); // pretty
+
+  // Now copy the rest of the file verbatim
+  // BIG ISSUE IF WE HAVE LOOPED around
+  // ONLY WORKS IF WE HAVE NOT LOOPED IE P <=1
+  while (bdat.numpixelbytes--) {
+      int c = fgetc(fbmp);
+      assert(c != EOF);
+      fputc(c, fout);
+  }
+  // This is making sure we are at the end
+  assert(fgetc(fbmp) == EOF);
+
+  return 0;
+}

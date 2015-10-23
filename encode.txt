@@ -1,0 +1,103 @@
+/*
+ *  encode.c
+ *
+ *  Created on: 23 Oct 2015
+ *      Author: zarifaziz
+ */
+
+#include "steg.h"
+#include "bitmap.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <ctype.h>
+#include <math.h>
+
+void encode(const char *bmpfile, const char *datafile, const char *outputfile)
+{
+	// Check that the output file exists
+	if (checkfile(outputfile))
+	{
+		// query whether to overwrite, terminating the program
+		// if the user doesn’t type ‘y’
+		if (!overwritePromptYes(outputfile))
+		{
+			// breaks out of the function if
+			// overwrite prompt is no
+			// changing from return 1 to an exit
+			printf("About to exit!\n");
+			exit(0);
+		}
+		// else
+		// {
+		//   // otherwise, terminate the program
+		//   break;
+		// }
+	}
+
+	FILE *fbmp = fopen(bmpfile, "rb");
+	FILE *fout = fopen(outputfile, "wb");
+	FILE *fdata = fopen(datafile, "rb");
+	BmpData bdat;
+
+	// Check that the pointers above actually point to something
+  if (fbmp == NULL || fout == NULL ) {
+      printf("Error: Could not open files.\n"); // Needs to be replaced with proper message?
+      return 1;
+  }
+
+	// get the header and pixel data information
+	bdat = check_bitmap(fbmp);
+
+	// Skipping over the header block
+  fseek(fbmp, bdat.headersize, SEEK_SET);
+
+
+	/* Finding the size of the data file */
+	unsigned int dataSize = sizeFiler(fdat);
+	printf("dataSize = %u\n", dataSize);
+
+	/* If the size of the file is too large, we cannot store the file inside the image */
+	if (dataSize > (bdat.numpixelbytes - 32))
+	{
+		printf("Error: Bitmap too small to store data file.");
+		fclose(fbmp);
+		fclose(fdat);
+		fclose(fout);
+		return;
+	}
+
+	/* Calculating the corruption to print later */
+	double corruption = 100 * dataSize / bdat.numpixelbytes;
+
+	/* Copying header verbatim */
+	copynFile(fbmp, fout, bdat.headersize);
+
+	/* Encoding the size of the data into the bitmap, and decrementing "bdat.numpixelbytes" */
+	bdat.numpixelbytes = encodeDataSize(fbmp, fout, dataSize, bdat.numpixelbytes);
+
+	/* This buffer will store bytes from the input file, which lets us access each byte easily */
+	unsigned char *buffer = (unsigned char *)malloc(bdat.numpixelbytes * sizeof(unsigned char));
+
+	/* Copying everything from the input file to the buffer */
+	fileToArrayn(buffer, fbmp, bdat.numpixelbytes);
+	assert(fgetc(fbmp) == EOF);
+	fclose(fbmp);
+
+	/* Modifying the bits to store the data file */
+	int bitsmodpbyte = (int)((8 * dataSize + bdat.numpixelbytes - 1) / bdat.numpixelbytes);
+	setBits(buffer, fdat, bdat.numpixelbytes, bitsmodpbyte);
+	assert(fgetc(fdat) == EOF);
+	fclose(fdat);
+
+	/* Copying everything from the output file to the buffer */
+	arrayToFilen(buffer, fout, bdat.numpixelbytes);
+	free(buffer);
+	fclose(fout);
+
+	printf("There was a maximum of %d bits modified per byte.\n", bitsmodpbyte);
+	printf("Level of pixel corruption = %f%%\n", corruption);
+
+	return 0;
+}

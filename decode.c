@@ -17,80 +17,17 @@
 
 
 
-// checking if outputfile already exists
-int checkfile(const char * outputfile)
-{
-  FILE *fp;
-  if (fp == fopen(outputfile, "rb"))
-  {
-    // DOES THE OPPOSITE, ASK TUTOR
-    fclose(fp);
-    return 0;
-  }
-  printf("detecting duplicate file\n");
-  return 1;
-}
-
-int overwritePromptYes(const char * outputfile)
-{
-
-  printf("Running at the start of overwrite function\n");
-  // initialing array
-  char str[SMALLSIZE];
-  printf("Output file %s already exists. Overwrite (y/n)?\n", outputfile);
-	fgets(str, SMALLSIZE, stdin);
-
-  //Checking that 'y' was entered followed by enter key
-  //Otherwise, exit the program
-  // changed from || to &&
-	if (str[0] == 'y' && str[1] == '\n')
-	{
-		return 1;
-	}
-	return 0;
-}
-
 int decode(const char *bmpfile, const char *outputfile)
 {
-  // Check that the output file exists
-  if (checkfile(outputfile))
-	{
-    // query whether to overwrite, terminating the program
-    // if the user doesn’t type ‘y’
-		if (!overwritePromptYes(outputfile))
-		{
-      // breaks out of the function if
-      // overwrite prompt is no
-      // changing from return 1 to an exit
-      printf("About to exit!\n");
-			exit(0);
-		}
-    // else
-    // {
-    //   // otherwise, terminate the program
-    //   break;
-    // }
-	}
-
   FILE *fbmp = fopen(bmpfile, "rb");
   FILE *fout = fopen(outputfile, "wb");
   BmpData bdat;
-
-  // Check that the pointers above actually point to something
-  if (fbmp == NULL || fout == NULL ) {
-      printf("Error: Could not open files.\n"); // Needs to be replaced with proper message?
-      return 1;
-  }
 
   // get the header and pixel data information
   bdat = check_bitmap(fbmp);
 
   // Skipping over the header block
-  while (bdat.headersize--)
-  {
-      // increasing the counter for the fgetc
-      int c = fgetc(fbmp);
-  }
+  fseek(fbmp, bdat.headersize, SEEK_SET);
 
   // tells you the size of your message in bytes
   int bytSize = 0;
