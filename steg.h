@@ -5,12 +5,19 @@
  *      Author: Zarif Aziz
  */
 
+
 #ifndef STEG_H_
 #define STEG_H_
 
 /* Declaring rules: Constants, arrays, integers, functions
  */
 #define SMALLSIZE 5
+
+int dataSize, modbits, numpixelbytes;
+char c, *ptrbitmap, *dataptr, *outptr, input[255];
+// FILE *bmpfile, *datafile, *outputfile;
+
+// BmpData bdat;
 
 const char *bmpfile;
 const char *outputfile;

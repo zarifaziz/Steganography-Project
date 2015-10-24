@@ -144,7 +144,7 @@ int encode(char *read,char * data,char *write)
       assert(c != EOF);
       fputc(c, fout);
   }
-  
+
   // This is making sure we are at the end
   assert(fgetc(fbmp) == EOF);
 

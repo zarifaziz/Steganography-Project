@@ -5,6 +5,7 @@
  *      Author: zarifaziz
  */
 
+#include "encode.h"
 #include "bitmap.h"
 #include "steg.h"
 #include <stdio.h>
@@ -19,6 +20,9 @@
 // ./steg acfr...
 
 // These functions run on both encode and decode
+
+// Do I keep this here ????
+BmpData bdat;
 
 // checking if outputfile already exists
 int checkfile(const char * outputfile)
@@ -83,7 +87,7 @@ int main(int argc, char *argv[])
 
       FILE *fbmp = fopen(argv[1], "rb");
       FILE *fout = fopen(argv[2], "wb");
-      BmpData bdat;
+      //BmpData bdat;
 
       if(fbmp == NULL)
     	{
@@ -115,6 +119,7 @@ int main(int argc, char *argv[])
           printf("About to exit!\n");
     			exit(0);
     		}
+
         // else
         // {
         //   // otherwise, terminate the program
@@ -125,7 +130,7 @@ int main(int argc, char *argv[])
       // not redifining variables
       fbmp = fopen(argv[1], "rb");
       fout = fopen(argv[3], "wb");
-
+      FILE *fdata = fopen(argv[2], "rb");
       //BmpData bdat;
 
       if(fbmp == NULL)
@@ -139,13 +144,73 @@ int main(int argc, char *argv[])
         return 0;
     	}
 
+      //#if 0
+
+      // Extracting header size and number of pixels available for data storage
+      // Copying header to the output file verbatim
+      // copying information to memory array
+
+      // get the header and pixel data information
+      bdat = check_bitmap(fbmp);
+
+      int i;
+
+      for(i = 0; i <= (int)bdat.headersize; i++)
+			{
+				c = fgetc(fbmp);
+				fputc(c, fout);
+			}
+
+      numpixelbytes = (int)bdat.numpixelbytes;
+      // Memory allocation  for an array of equal size to the picture pixel array
+			ptrbitmap = (char*)malloc(numpixelbytes);
+
+      fseek(fbmp, bdat.headersize, SEEK_SET);
+
+      for(i = 0; i <= numpixelbytes; i++)
+			{
+				ptrbitmap[i] = fgetc(fbmp);
+			}
+
+      // Checking whether datafile has been opened correctly
+      // Reading length of the data
+			if(fdata == NULL)
+			{
+				printf("Error: Could not open file %s.\n", argv[2]); return 0;
+			}
+
+      fseek(fdata, 0L, SEEK_END);
+			dataSize = ftell(fdata);
+			rewind(fdata);
+
+      if(dataSize > numpixelbytes-32)
+			{
+				printf("Error: Bitmap too small to store data file.");
+				return 0;
+			}
+
+			dataptr = (char*)malloc(dataSize);
+			fread(dataptr, sizeof(char), dataSize, fdata);
+
       // If all tests pass, start encoding!!
+      // encode size of data to first part of output pixels
+
+      // Declaration functions
+      encodesize(dataSize, ptrbitmap);
+			modbits = encode(dataSize, numpixelbytes-32, ptrbitmap, dataptr);
+
+      fseek(fout,bdat.headersize,SEEK_SET);
+			fwrite(ptrbitmap,sizeof(char),numpixelbytes,fout);
+
+      // Closing the files
+			fclose(fbmp);
+			fclose(fdata);
+			fclose(fout);
   		// encode(argv[1], argv[2], argv[3]);
 
+      // #endif
+
 		  break;
-
-
-
 
     // If program is run with wrong arguments, print following message and terminate
 		default:
@@ -154,9 +219,8 @@ int main(int argc, char *argv[])
 				"\tsteg <bmpfile> <outputfile>\n");
 			break;
 
-
 	}
-//  #endif
+  //  #endif
 
   printf("Running after switch statement\n");
 
