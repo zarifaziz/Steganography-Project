@@ -61,48 +61,88 @@ int main(int argc, char *argv[])
   switch (argc)
 	{
 		case 3:
-    // Check that the output file exists
-    if (checkfile(argv[2]))
-  	{
-      // query whether to overwrite, terminating the program
-      // if the user doesn’t type ‘y’
-  		if (!overwritePromptYes(argv[2]))
-  		{
-        // breaks out of the function if
-        // overwrite prompt is no
-        // changing from return 1 to an exit
-        printf("About to exit!\n");
-  			exit(0);
-  		}
-      // else
-      // {
-      //   // otherwise, terminate the program
-      //   break;
-      // }
-  	}
+      // Check that the output file exists
+      if (checkfile(argv[2]))
+    	{
+        // query whether to overwrite, terminating the program
+        // if the user doesn’t type ‘y’
+    		if (!overwritePromptYes(argv[2]))
+    		{
+          // breaks out of the function if
+          // overwrite prompt is no
+          // changing from return 1 to an exit
+          printf("About to exit!\n");
+    			exit(0);
+    		}
+        // else
+        // {
+        //   // otherwise, terminate the program
+        //   break;
+        // }
+    	}
 
-    FILE *fbmp = fopen(argv[1], "rb");
-    FILE *fout = fopen(argv[2], "wb");
-    BmpData bdat;
+      FILE *fbmp = fopen(argv[1], "rb");
+      FILE *fout = fopen(argv[2], "wb");
+      BmpData bdat;
 
-    if(fbmp == NULL)
-  	{
-  		printf("Error: Could not open file %s.\n", argv[1]);
-      return 0;
-  	}
-  	if(fout == NULL)
-  	{
-  		printf("Error: Could not open file %s.\n", argv[2]);
-      return 0;
-  	}
-			decode(argv[1], argv[2]);
-			break;
+      if(fbmp == NULL)
+    	{
+    		printf("Error: Could not open file %s.\n", argv[1]);
+        return 0;
+    	}
+    	if(fout == NULL)
+    	{
+    		printf("Error: Could not open file %s.\n", argv[2]);
+        return 0;
+    	}
+  			decode(argv[1], argv[2]);
+  			break;
 
 
 
 		case 4:
-			//encode(argv[1], argv[2], argv[3]);
-			break;
+
+      // Check that the output file exists
+      if (checkfile(argv[3]))
+    	{
+        // query whether to overwrite, terminating the program
+        // if the user doesn’t type ‘y’
+    		if (!overwritePromptYes(argv[3]))
+    		{
+          // breaks out of the function if
+          // overwrite prompt is no
+          // changing from return 1 to an exit
+          printf("About to exit!\n");
+    			exit(0);
+    		}
+        // else
+        // {
+        //   // otherwise, terminate the program
+        //   break;
+        // }
+    	}
+
+      // not redifining variables
+      fbmp = fopen(argv[1], "rb");
+      fout = fopen(argv[3], "wb");
+
+      //BmpData bdat;
+
+      if(fbmp == NULL)
+    	{
+    		printf("Error: Could not open file %s.\n", argv[1]);
+        return 0;
+    	}
+    	if(fout == NULL)
+    	{
+    		printf("Error: Could not open file %s.\n", argv[3]);
+        return 0;
+    	}
+
+      // If all tests pass, start encoding!!
+  		// encode(argv[1], argv[2], argv[3]);
+
+		  break;
 
 
 

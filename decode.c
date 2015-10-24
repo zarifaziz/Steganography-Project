@@ -36,7 +36,7 @@ int decode(const char *bmpfile, const char *outputfile)
       // display 1 or 0 based on the modulus of the byte/2
       // c is in decimal system, it's an int
       // MAYBE CHANGE 32 TO WRITESTART
-      for (int bytPos = 0; bytPos <= 31; bytPos++) {
+      for (int bytPos = 0; bytPos < writeStart; bytPos++) {
 
           // getting next bytes
           int c = fgetc(fbmp);
@@ -52,7 +52,7 @@ int decode(const char *bmpfile, const char *outputfile)
           }
           // Store LSB to second LSB
           // do not perform left shift on the last bit
-          if (bytPos != 31) {
+          if (bytPos+1 != writeStart) {
             // introduce new zero to the LSB
             // shifts the 1 or 0 to the left
             bytSize = bytSize << 1;

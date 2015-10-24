@@ -42,9 +42,15 @@ int encode(char *read,char * data,char *write)
   }
 
   // Analyse the datafile and get its size information and message in binary
-  int len = flength(fdata); // decimal value of message length in bytes
+  // decimal value of message length in bytes
+  int len = flength(fdata);
+
   char blen[33];
+
+  // fill the array with nulls
   memset(blen, '\0',33); //make sure we arent concantenating accidentally
+
+  // guessing it means decimal to binary
   dec_bin(len, &blen[0], 32);
   // printf("message length = %s\n", blen);
   rewind(fdata);
@@ -53,6 +59,7 @@ int encode(char *read,char * data,char *write)
 // Decimal value of the size to manipulate each byte of the first 32
 
   // Copy the first 32 bytes with the size of message information embedded
+  // 0 - 31
   for (int i = 0; i < 32; i++) { // Should go 0-31 which is 32 bytes total
     int c = fgetc(fbmp);
     assert(c != EOF);
@@ -87,7 +94,8 @@ int encode(char *read,char * data,char *write)
   // them through a decimal to binary converter
   for (int i = 0; i < len; i++) {
     char bin_digit[9];
-    memset(bin_digit, '\0', 9); // Think it might be concantenating due to no NULL
+    memset(bin_digit, '\0', 9); // Think it might be concatenating due to no NULL
+
     int d = fgetc(fdata);
     dec_bin(d, &bin_digit[0], 8);
 
@@ -136,6 +144,7 @@ int encode(char *read,char * data,char *write)
       assert(c != EOF);
       fputc(c, fout);
   }
+  
   // This is making sure we are at the end
   assert(fgetc(fbmp) == EOF);
 
