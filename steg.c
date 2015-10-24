@@ -99,7 +99,12 @@ int main(int argc, char *argv[])
     		printf("Error: Could not open file %s.\n", argv[2]);
         return 0;
     	}
+
+        // Start decoding !!
   			decode(argv[1], argv[2]);
+
+        fclose(fbmp);
+  			fclose(fout);
   			break;
 
 
@@ -155,21 +160,22 @@ int main(int argc, char *argv[])
 
       int i;
 
-      for(i = 0; i <= (int)bdat.headersize; i++)
+      for(i = 0; i <= bdat.headersize; i++)
 			{
 				c = fgetc(fbmp);
 				fputc(c, fout);
 			}
 
-      numpixelbytes = (int)bdat.numpixelbytes;
+      numPBytes = bdat.numpixelbytes;
+
       // Memory allocation  for an array of equal size to the picture pixel array
-			ptrbitmap = (char*)malloc(numpixelbytes);
+			bitmapptr = (char*)malloc(numPBytes);
 
       fseek(fbmp, bdat.headersize, SEEK_SET);
 
-      for(i = 0; i <= numpixelbytes; i++)
+      for(i = 0; i <= numPBytes; i++)
 			{
-				ptrbitmap[i] = fgetc(fbmp);
+				bitmapptr[i] = fgetc(fbmp);
 			}
 
       // Checking whether datafile has been opened correctly
@@ -179,28 +185,29 @@ int main(int argc, char *argv[])
 				printf("Error: Could not open file %s.\n", argv[2]); return 0;
 			}
 
+      // Getting size of data
       fseek(fdata, 0L, SEEK_END);
-			dataSize = ftell(fdata);
+			dataFileSize = ftell(fdata);
 			rewind(fdata);
 
-      if(dataSize > numpixelbytes-32)
+      if(dataFileSize > numPBytes-32)
 			{
 				printf("Error: Bitmap too small to store data file.");
 				return 0;
 			}
 
-			dataptr = (char*)malloc(dataSize);
-			fread(dataptr, sizeof(char), dataSize, fdata);
+			dataptr = (char*)malloc(dataFileSize);
+			fread(dataptr, sizeof(char), dataFileSize, fdata);
 
       // If all tests pass, start encoding!!
       // encode size of data to first part of output pixels
 
       // Declaration functions
-      encodesize(dataSize, ptrbitmap);
-			modbits = encode(dataSize, numpixelbytes-32, ptrbitmap, dataptr);
+      encodesize(dataFileSize, bitmapptr);
+			modbits = encode(dataFileSize, numPBytes-32, bitmapptr, dataptr);
 
       fseek(fout,bdat.headersize,SEEK_SET);
-			fwrite(ptrbitmap,sizeof(char),numpixelbytes,fout);
+			fwrite(bitmapptr,sizeof(char),numPBytes,fout);
 
       // Closing the files
 			fclose(fbmp);

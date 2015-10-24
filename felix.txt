@@ -1,0 +1,23 @@
+/*
+ * PRIMARY function of the encode module, which encodes 1 bit at a time
+ */
+void Encode1bit(unsigned int bitnumber, unsigned char value)
+{
+	if (value == 0)
+		buffer[bufposition] &= ~bitmask[bitnumber] ;
+	else
+		buffer[bufposition] |= bitmask[bitnumber] ;
+}
+
+/*
+ * SECONDARY function of the encode module
+ */
+void EncodeDataSizeByte(unsigned long encodedata)
+{
+	int i;
+	for (i=7;i>-1;i--)
+	{
+		Encode1bit(0, encodedata&bitmask[i]);
+		bufposition++;
+	}
+}

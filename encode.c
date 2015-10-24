@@ -16,44 +16,39 @@
 #include <ctype.h>
 #include <math.h>
 
+#define SET(input,pos) ((input) | (1L << (pos)))
+#define CLEAR(input,pos) ((input) & ~(1L << (pos)))
+#define INVERT(input,pos) ((input) ^ (1L << (pos)))
+#define TEST(input,pos) ((input) & (1L << (pos)))
 
-#define SETBIT(arg,posn) ((arg) | (1L << (posn)))
-#define CLRBIT(arg,posn) ((arg) & ~(1L << (posn)))
-#define FLIPBIT(arg,posn) ((arg) ^ (1L << (posn)))
-#define TESTBIT(arg,posn) ((arg) & (1L << (posn)))
-
-
-void encodesize(int dataSize, char * bitarr )
+void encodesize(int dataFileSize, char * bitarr )
 {
-
 	/**
 	* Encodesize hides an integer containing the size of the hidden data.
 	* Encodesize sets the LSB values of the first 32 bytes in the bitmap array.
-	* @param dataSize-size of data number to be stored
+	* @param dataFileSize-size of data number to be stored
 	* @param bitarr- array storing the information of the bitmap which will be written to the output bitmap.
 	*/
 	int s;
 	for(s = 0; s < 32; s++)
 	{
-		if(TESTBIT(dataSize, s) != 0)
+		if(TEST(dataFileSize, s) != 0)
 		{
-			bitarr[s] = SETBIT(bitarr[s], 0);
+			bitarr[s] = SET(bitarr[s], 0);
 		} else
 		{
-			bitarr[s] = CLRBIT(bitarr[s], 0);
+			bitarr[s] = CLEAR(bitarr[s], 0);
 		}
 	}
 }
 
-
-int encode(int dataSize, int bytePixel, char * bitarr, char * dataarr)
+int encode(int dataFileSize, int bytePixel, char * bitarr, char * dataarr)
 {
-
 	/**
 	* Encoder encrypts the data into a specified output bitmap file
 	* This is done by modifying the array containing bitmap information and returns the maximum number of bits used.
 	*
-	* @param dataSize- size of the data encoded into the output file.
+	* @param dataFileSize- size of the data encoded into the output file.
 	* @param bytePixel- total number of available space in the bitmap file which can be used to store the data.
 	* @param bitarr- an array that stores all the raw information from the .bmp file modified by the encoder
 	* @param dataarr- an array containing datafile information which is to be hidden.
@@ -62,9 +57,8 @@ int encode(int dataSize, int bytePixel, char * bitarr, char * dataarr)
 	*/
 
 int a, b, d=0, c=32;
-
 	/** Encoder utilizes an inner and outer loop.
-	* 		The outer loop iterates the dataSize to be hidden
+	* 		The outer loop iterates the dataFileSize to be hidden
 	* 		The inner loop reads the individual bits of each data charater and saves them to the relevant least significant bit in an array.
 	*
 	* a- counts the character of the data array containing information to be hidden
@@ -76,20 +70,18 @@ int a, b, d=0, c=32;
 	* Copy the information by checking the value of each bit.
 	*/
 
-	for(a = 0; a < dataSize; a++)
+	for(a = 0; a < dataFileSize; a++)
 	{
-
 // c= 0
-
 		for(b = 0, c=0; b <= 7; b++, c++)
 		{
 			if(c > bytePixel) d++, c = 32;
-			if(TESTBIT(dataarr[a], b) != 0)
+			if(TEST(dataarr[a], b) != 0)
 			{
-				bitarr[c] = SETBIT(bitarr[c], d);
+				bitarr[c] = SET(bitarr[c], d);
 			} else
 			{
-				bitarr[c] = CLRBIT(bitarr[c], d);
+				bitarr[c] = CLEAR(bitarr[c], d);
 			}
 		}
 	}
