@@ -6,7 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Declaring functions
 
-void encodesize(int dataSize,char * bitarr );
+void encodeDataSizeByte(int dataSize,char * bitmapBuffer );
 
-int encode( int dataSize, int bytepixel, char * bitarr, char * data);
+int encode( int dataFileSize, int bytepixel, char * bitmapBuffer, char * dataBuffer);

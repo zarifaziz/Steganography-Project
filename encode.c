@@ -16,74 +16,70 @@
 #include <ctype.h>
 #include <math.h>
 
-#define SET(input,pos) ((input) | (1L << (pos)))
-#define CLEAR(input,pos) ((input) & ~(1L << (pos)))
-#define INVERT(input,pos) ((input) ^ (1L << (pos)))
 #define TEST(input,pos) ((input) & (1L << (pos)))
+#define SET(input,pos) ((input) | (1L << (pos)))
+#define INVERT(input,pos) ((input) ^ (1L << (pos)))
+#define CLEAR(input,pos) ((input) & ~(1L << (pos)))
 
-void encodesize(int dataFileSize, char * bitarr )
+// Hides an integer containing the size of the hidden data
+// hides it in the LSB values of the first 32 bytes in the bitmap
+// inputs: dataFileSize - size of the data number to be stored
+// bitmapBuffer - array which contains the info of the bitmap
+// output: none
+void encodeDataSizeByte(int dataFileSize, char * bitmapBuffer )
 {
-	/**
-	* Encodesize hides an integer containing the size of the hidden data.
-	* Encodesize sets the LSB values of the first 32 bytes in the bitmap array.
-	* @param dataFileSize-size of data number to be stored
-	* @param bitarr- array storing the information of the bitmap which will be written to the output bitmap.
-	*/
-	int s;
-	for(s = 0; s < 32; s++)
+	int j;
+	for(j = 0; j < 32; j++)
 	{
-		if(TEST(dataFileSize, s) != 0)
+		if(TEST(dataFileSize, j) != 0)
 		{
-			bitarr[s] = SET(bitarr[s], 0);
+			bitmapBuffer[j] = SET(bitmapBuffer[j], 0);
 		} else
 		{
-			bitarr[s] = CLEAR(bitarr[s], 0);
+			bitmapBuffer[j] = CLEAR(bitmapBuffer[j], 0);
 		}
 	}
 }
 
-int encode(int dataFileSize, int bytePixel, char * bitarr, char * dataarr)
+
+/**
+* Encodes the data into the output buffer
+* modifies the buffer containing bitmap information
+* returns the maximum number of bits used
+* inputs:  dataFileSize- size of the data encoded into the output file.
+* inputs:  bytePixel- total number of available space in the bitmap file which can be used to store the data.
+* inputs:  bitmapBuffer- an array that stores all the raw information from the .bmp file modified by the encoder
+* inputs:  dataBuffer- an array containing datafile information which is to be hidden.
+*
+* output: the number of bits written per byte.
+*/
+int encode(int dataFileSize, int bytePixel, char * bitmapBuffer, char * dataBuffer)
 {
-	/**
-	* Encoder encrypts the data into a specified output bitmap file
-	* This is done by modifying the array containing bitmap information and returns the maximum number of bits used.
-	*
-	* @param dataFileSize- size of the data encoded into the output file.
-	* @param bytePixel- total number of available space in the bitmap file which can be used to store the data.
-	* @param bitarr- an array that stores all the raw information from the .bmp file modified by the encoder
-	* @param dataarr- an array containing datafile information which is to be hidden.
-	*
-	* @return d- the number of bits written per byte.
-	*/
+	// Contains two loops
+	// charCount - counts the character of the data array containing information to be hidden
+	// bitPos- counts bit position of the bitmap byte written to.
+	// bitCount - Location reference for the bitmap array encoder writes to. Counts the total number of bits which have been written to.
+	// bitmapPos- counts the position of the bit in the bitmap written to.
+	//
+	int charCount, bitPos, bitmapPos=0, bitCount=32;
 
-int a, b, d=0, c=32;
-	/** Encoder utilizes an inner and outer loop.
-	* 		The outer loop iterates the dataFileSize to be hidden
-	* 		The inner loop reads the individual bits of each data charater and saves them to the relevant least significant bit in an array.
-	*
-	* a- counts the character of the data array containing information to be hidden
-	* b- counts bit position of the bitmap byte written to.
-	* c- Location reference for the bitmap array encoder writes to. Counts the total number of bits which have been written to.
-	* d- counts the position of the bit in the bitmap written to.
-
-	* Reset the counter and begin to read from the next least significant bit when the total number of bytes exceeds the number of bytes available
-	* Copy the information by checking the value of each bit.
-	*/
-
-	for(a = 0; a < dataFileSize; a++)
-	{
-// c= 0
-		for(b = 0, c=0; b <= 7; b++, c++)
+	// Reset the counter and begin to read from next LSB
+	// when bytes exceeds available
+	// Copy the information
+		for(charCount = 0; charCount < dataFileSize; charCount++)
 		{
-			if(c > bytePixel) d++, c = 32;
-			if(TEST(dataarr[a], b) != 0)
+			// this loop reads individual bits of each data char saves them to appropraite LSB
+			for(bitPos = 0, bitCount=0; bitPos <= 7; bitPos++, bitCount++)
 			{
-				bitarr[c] = SET(bitarr[c], d);
-			} else
-			{
-				bitarr[c] = CLEAR(bitarr[c], d);
+				if(bitCount > bytePixel) bitmapPos++, bitCount = 32;
+				if(TEST(dataBuffer[charCount], bitPos) != 0)
+				{
+					bitmapBuffer[bitCount] = SET(bitmapBuffer[bitCount], bitmapPos);
+				} else
+				{
+					bitmapBuffer[bitCount] = CLEAR(bitmapBuffer[bitCount], bitmapPos);
+				}
 			}
 		}
-	}
-	return d;
+		return bitmapPos;
 }

@@ -15,10 +15,13 @@
 #include <math.h>
 
 
-
-
+// decodes the message from the bitmap file into the output file
+// inputs: pointer to the bitmap file and pointer to the output file
+// output: returns an int to signify whether the function
 int decode(const char *bmpfile, const char *outputfile)
 {
+  // opening files
+
   FILE *fbmp = fopen(bmpfile, "rb");
   FILE *fout = fopen(outputfile, "wb");
   BmpData bdat;
@@ -35,16 +38,12 @@ int decode(const char *bmpfile, const char *outputfile)
       // Trying to pull out the first 32 bytes for the size of data
       // display 1 or 0 based on the modulus of the byte/2
       // c is in decimal system, it's an int
-      // MAYBE CHANGE 32 TO WRITESTART
       for (int bytPos = 0; bytPos < writeStart; bytPos++) {
 
           // getting next bytes
           int c = fgetc(fbmp);
           // throw an error if EOF is reached
           assert(c != EOF);
-
-          // need new system for multiple bits
-          // what's c divided by 0 ?
           // if modulus is not = 0, the LSB is 1
           if(c % 2 != 0) {
             // the current LSB is 1, so store that
@@ -62,23 +61,17 @@ int decode(const char *bmpfile, const char *outputfile)
     // converting from bytes to bits
   int bitSize = bytSize * 8;
 
-  /*
-  * Need to do a calculation to figure out how many times
-  * we are going to need to loop through if at all
-  */
-
-// FOR LOOPING
+  // FOR LOOPING
   // going to take the number of the bytes of the image minus 32
   // number of bits divided by that value
   // what we get is the number of bits per byte that we have to manipulate
   // if that number is greater than 8, then we get an error
 
-
   // Here is where we loop through the image and pull out all the bits
   // Computing how many times we need to loop
   int loops = floor((bitSize-1) / (bdat.numpixelbytes - writeStart)) + 1;
   // need more than 8 bits per byte
-  if (loops > 8) {
+  if (loops >= 9) {
     printf("Error: Expected data size is larger than available space in bitmap.\n");
     // terminate the program
     exit(0);
@@ -92,19 +85,12 @@ int decode(const char *bmpfile, const char *outputfile)
       // Now for the rest of the data until the number given above
       // we need to go through and pull out the LSB
       for (int j = 1; j <= bitSize; j++) {
-
         // getting next bytes
         int c = fgetc(fbmp);
-        // throw an error if EOF is reached
+        // make sure EOF is not reached
         assert(c != EOF);
-
         // perform left shift by n-1
         c = c >> (pos-1);
-
-        // This is where I would implement stuff to move around
-        // if we need to go through data more than once
-
-        // need new system for multiple bits
         if(c % 2 != 0) {
           // the current LSB is 1, so store that
           current_byte = current_byte + 1;
@@ -126,7 +112,7 @@ int decode(const char *bmpfile, const char *outputfile)
         // As long as file is still being written
         if ((j/pos)+writeStart == bdat.numpixelbytes && loops > 1)
         {
-          // offset to writeable bytes
+          // create offset
           fseek(fbmp, bdat.headersize+writeStart, SEEK_SET);
           // do this for the number of loops
           loops = loops - 1;
@@ -134,12 +120,5 @@ int decode(const char *bmpfile, const char *outputfile)
           pos = pos + 1;
         }
       }
-
-  printf("Running after end of decode\n");
   return 0;
 }
-
-// TIPS FOR ENCODING
-// first figure out the binary
-
-//

@@ -13,9 +13,15 @@
  */
 #define SMALLSIZE 5
 
-int dataFileSize, modbits, numPBytes;
-char c, *bitmapptr, *dataptr, *outptr, input[255];
-// FILE *bmpfile, *datafile, *outputfile;
+int dataFileSize, bitsModified, numPBytes, c;
+char *bitmapBuffer, *dataBuffer, *outptr, input[255];
+
+
+//FILE *bmpfile, *datafile, *outputfile;
+
+
+//int buffer, bufposition, bufbitnumber;
+
 
 // BmpData bdat;
 
