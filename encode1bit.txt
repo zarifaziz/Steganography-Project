@@ -1,5 +1,13 @@
 
 
+#include "encode.h"
+#include "bitmap.h"
+#include "steg.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
 /*
  * PRIMARY function of the encode module, which encodes 1 bit at a time
  */

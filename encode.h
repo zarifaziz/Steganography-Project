@@ -8,6 +8,6 @@
 
 // Declaring functions
 
-void encodeDataSizeByte(int dataSize,char * bitmapBuffer );
+void encodeBit(unsigned int bitnumber, unsigned char value);
 
-int encode( int dataFileSize, int bytepixel, char * bitmapBuffer, char * dataBuffer);
+void encodeByte(unsigned long dataSize);

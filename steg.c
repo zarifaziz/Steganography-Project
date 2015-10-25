@@ -24,6 +24,43 @@
 // Do I keep this here ????
 BmpData bdat;
 
+// representing a bitMask of 1's at different positions in binary
+const unsigned char bitMask[8]={0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80};
+
+/*
+ * encodes each bit
+ */
+void encodeBit(unsigned int bitnumber, unsigned char binary)
+{
+	if (binary == 0)
+		dataPtr[bufCount] &= ~bitMask[bitnumber] ;
+	else
+		dataPtr[bufCount] |= bitMask[bitnumber] ;
+}
+/*
+ *  takes one byte and encodes it by passing it to another function
+ */
+void encodeByte(unsigned long dataSize)
+{
+	int i;
+	for (i=7;i>-1;i--)
+	{
+		encodeBit(0, dataSize&bitMask[i]);
+		bufCount++;
+	}
+}
+
+// Increases the dataPtr position every time
+void stepUpPtr()
+{
+	bufCount++;
+	if (bufCount >= bdat.numpixelbytes)
+	{
+		bufCount = 32;
+		bufferbitPtr++;
+	}
+}
+
 // checking if outputfile already exists
 int checkfile(const char * outputfile)
 {
@@ -36,6 +73,9 @@ int checkfile(const char * outputfile)
   return 0;
 }
 
+// Prompts the user to overwrite the output file
+// input: pointer to the outputfile
+// output: returns an int to signal whether wants to overwrite or not
 int overwritePromptYes(const char * outputfile)
 {
   // initialing array
@@ -149,71 +189,68 @@ int main(int argc, char *argv[])
       // Copying header to the output file verbatim
       // copying information to memory array
 
-      // get the header and pixel data information
-      bdat = check_bitmap(fbmp);
+        bdat = check_bitmap(fbmp);
 
-      int i;
+        int i;
+        int c = 0;
 
-      // Header copied the  to the output file
-      for(i = 0; i <= bdat.headersize; i++)
-			{
-				c = fgetc(fbmp);
-				fputc(c, fout);
-			}
+        for (i=0;i<bdat.headersize;i++)
+        { /* Copy header verbatim */
+           c = fgetc(fbmp);
+         fputc(c, fout);
+        }
 
-      // Number of bytes that store picture information saved
-      numPBytes = bdat.numpixelbytes;
+        // store bytes from the data file
+        dataPtr = (unsigned char *)malloc(bdat.numpixelbytes * sizeof(unsigned char));
 
-      // Memory allocation  for an array of equal size to the picture pixel array
-			bitmapBuffer = (char*)malloc(numPBytes);
+        //store bitmap in array
+        fread(dataPtr, 1, bdat.numpixelbytes, fbmp);
 
-      // offset past the header
-      fseek(fbmp, bdat.headersize, SEEK_SET);
+        //check size of data
+        fseek(fdata, 0L, SEEK_END);
+        dataSize = ftell(fdata);
+        rewind(fdata);
 
-      // Information copied from the picture pixel array to the allocated memory array
-      for(i = 0; i <= numPBytes; i++)
-			{
-				bitmapBuffer[i] = fgetc(fbmp);
-			}
+        loops = ( (8*dataSize)/(bdat.numpixelbytes -32) )+1;//
+        if (loops>8)
+        {
+          printf("Error: Bitmap too small to store data file.\n");
+          return(0);
+        }
+        // Modifying the bits to store the data file
+        int modBits = ((8*dataSize + bdat.numpixelbytes - 1) / bdat.numpixelbytes);
+        // Displaying maximum number of modified bits
+        printf("There was a maximum of %d bits modified per byte.\n", modBits);
 
-      // Checking whether datafile has been opened correctly
-      // Reading length of the data
-			if(fdata == NULL)
-			{
-				printf("Error: Could not open file %s.\n", argv[2]); return 0;
-			}
+        // Clearing output dataPtr
+        fflush(stdout);
 
-      // Getting size of data
-      fseek(fdata, 0L, SEEK_END);
-			dataFileSize = ftell(fdata);
-			rewind(fdata);
+        bufCount=0;	bufferbitPtr =0;
 
-      // ensuring that there is enough space
-      if(dataFileSize > numPBytes - 32)
-			{
-				printf("Error: Bitmap too small to store data file.");
-				return 0;
-			}
+         //encode 4 bytes data size
+        encodeByte(dataSize>>24);
+        // encodes next
+        encodeByte(dataSize>>16);
+        // next
+        encodeByte(dataSize>>8);
+        encodeByte(dataSize);
 
-      // Allocating memory for an array equal to the size of the data
+        int z =0;
+        // Loop till EOF is reached
+        while ( (z=fgetc(fdata)) != EOF )
+        {
+          for(i=7;i>-1;i--)
+          {
+            // bitMask it
+            encodeBit(bufferbitPtr, z&bitMask[i]);
+            // as it loops through it masks the bitMask[]
+            // increases the position of the pointer
+              stepUpPtr();
+          }
+        }
 
-			dataBuffer = (char*)malloc(dataFileSize);
-			fread(dataBuffer, sizeof(int), dataFileSize, fdata);
-
-      // If all tests pass, start encoding!!
-      // encode size of data to first part of output pixels
-      encodeDataSizeByte(dataFileSize, bitmapBuffer);
-			bitsModified = encode(dataFileSize, numPBytes-32, bitmapBuffer, dataBuffer);
-
-      // Creating offset
-      fseek(fout,bdat.headersize,SEEK_SET);
-			fwrite(bitmapBuffer,sizeof(char),numPBytes,fout);
-
-      // Closing the files
-			fclose(fbmp);
-			fclose(fdata);
-			fclose(fout);
-  		// encode(argv[1], argv[2], argv[3]);
+        // dataPtr to fout
+        fwrite(dataPtr, 1, bdat.numpixelbytes, fout);
 
 		  break;
 
@@ -223,12 +260,6 @@ int main(int argc, char *argv[])
 				"\tsteg <bmpfile> <datafile> <outputfile>\n"
 				"\tsteg <bmpfile> <outputfile>\n");
 			break;
-
 	}
-  //  #endif
-
-  // Displaying number of bits modified
-  printf("\nThere was a maximum of %d bits modified per byte.\n", bitsModified+1);
-
 	return 0;
 }
