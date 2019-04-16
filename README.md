@@ -1,4 +1,5 @@
-# Steg
+# Steganography Project
+
 MTRX1702 C Assignment 2
 
-Making a change
+Objective is to encode a message into the pixels of a picture and then decode that message out of the picture.
